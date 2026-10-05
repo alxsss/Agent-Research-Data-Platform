@@ -1,0 +1,32 @@
+[project]
+name = "rdp"
+version = "0.1.0"
+description = "A small research data platform for LLM agent experiments: transcripts, metrics, and dataset lineage on Parquet + DuckDB."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pyarrow>=15",
+    "duckdb>=1.0",
+]
+
+[project.optional-dependencies]
+hf = ["transformers>=4.40"]
+
+[project.scripts]
+rdp = "rdp.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.5"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["rdp"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

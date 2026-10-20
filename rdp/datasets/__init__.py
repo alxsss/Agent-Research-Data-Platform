@@ -68,9 +68,19 @@ def content_hash(path: Path) -> str:
 
 
 def _describe(path: Path) -> tuple[str | None, int | None, str | None]:
-    """Return (format, row_count, schema_json) for formats DuckDB can read."""
-    target = str(path / "**" / "*") if path.is_dir() else str(path)
-    suffix = (next(path.rglob("*.*"), path) if path.is_dir() else path).suffix.lower()
+    """Return (format, row_count, schema_json) for formats DuckDB can read.
+
+    A directory is described only if all its files share one readable format;
+    anything else (e.g. a model checkpoint or a search index) gets (None, None, None).
+    """
+    if path.is_dir():
+        suffixes = {p.suffix.lower() for p in path.rglob("*") if p.is_file()}
+        if len(suffixes) != 1:
+            return None, None, None
+        suffix = suffixes.pop()
+        target = str(path / "**" / f"*{suffix}")
+    else:
+        suffix, target = path.suffix.lower(), str(path)
     reader = {".parquet": "read_parquet", ".jsonl": "read_json_auto",
               ".json": "read_json_auto", ".csv": "read_csv_auto"}.get(suffix)
     if reader is None:

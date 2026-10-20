@@ -19,6 +19,16 @@ def test_register_versions_idempotency_and_metadata(tmp_path):
     assert reg.get(v1).row_count == 2
     write_jsonl(f, [{"q": "x"}])
     assert reg.register("evalset", f) == "evalset:v2"
+    assert [r[0] for r in reg.list()] == ["evalset:v1", "evalset:v2"]  # returns timestamps
+
+
+def test_cli_datasets_lists_registered_versions(tmp_path, capsys):
+    from rdp.cli import main
+
+    reg = Registry(Store(tmp_path / "store"))
+    reg.register("evalset", write_jsonl(tmp_path / "a.jsonl", [{"q": "x"}]))
+    assert main(["--root", str(tmp_path / "store"), "datasets"]) == 0
+    assert capsys.readouterr().out.startswith("evalset:v1\t1\t")
 
 
 def test_verify_detects_modified_files(tmp_path):
@@ -38,6 +48,7 @@ def test_lineage_chain_and_unknown_parent(tmp_path):
     d = tmp_path / "ckpt"
     d.mkdir()
     (d / "w.bin").write_bytes(b"\x00\x01")
+    (d / "meta.json").write_text("{}")  # mixed formats: hash it, don't try to read it
     c = reg.register("c", d, parents=[b])
     assert reg.get(c).row_count is None
     assert reg.lineage(c) == [(c, 0, None), (b, 1, "run-1"), (a, 2, None)]

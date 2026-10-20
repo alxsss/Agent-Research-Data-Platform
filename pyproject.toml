@@ -7,10 +7,12 @@ requires-python = ">=3.11"
 dependencies = [
     "pyarrow>=15",
     "duckdb>=1.0",
+    "pytz",  # DuckDB needs it to return TIMESTAMPTZ values (catalog created_at) to Python
 ]
 
 [project.optional-dependencies]
 hf = ["transformers>=4.40"]
+research = ["datasets>=2.19", "bm25s>=0.2", "PyStemmer>=2.2"]
 
 [project.scripts]
 rdp = "rdp.cli:main"

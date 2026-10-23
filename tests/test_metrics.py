@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 import pytest
 
 from rdp import connect, start_run
@@ -85,3 +87,25 @@ def test_empty_store_views_are_queryable(tmp_path):
     for view in ["runs", "metrics", "episodes", "turns", "tool_calls", "grades",
                  "run_accuracy", "failure_modes", "metric_summary"]:
         assert con.execute(f"SELECT count(*) FROM {view}").fetchone() == (0,)
+
+
+def test_files_from_older_minor_schema_stay_queryable(tmp_path):
+    """Schema 1.0 episodes (no stop_reason) and 1.1 episodes read together."""
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
+    from rdp.schemas import SCHEMAS
+
+    store = Store(tmp_path)
+    old_schema = pa.schema([f for f in SCHEMAS["episodes"] if f.name != "stop_reason"])
+    old = pa.Table.from_pylist([{"run_id": "old", "episode_id": "e0", "n_turns": 0,
+                                 "started_at": datetime.now(UTC)}], schema=old_schema)
+    d = store.table_dir("episodes") / "run_id=old"
+    d.mkdir(parents=True)
+    pq.write_table(old.replace_schema_metadata({b"rdp.schema_version": b"1.0"}),
+                   d / "part-old.parquet")
+    with start_run("eval", store=store) as run:
+        run.log_episode(turns=[], stop_reason="answered")
+    rows = connect(store).execute(
+        "SELECT run_id = 'old', stop_reason FROM episodes ORDER BY 1").fetchall()
+    assert rows == [(False, "answered"), (True, None)]

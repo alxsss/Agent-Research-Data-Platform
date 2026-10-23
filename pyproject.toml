@@ -12,7 +12,7 @@ dependencies = [
 
 [project.optional-dependencies]
 hf = ["transformers>=4.40"]
-research = ["datasets>=2.19", "bm25s>=0.2", "PyStemmer>=2.2"]
+research = ["datasets>=2.19", "bm25s>=0.2", "PyStemmer>=2.2", "openai>=1.40"]
 
 [project.scripts]
 rdp = "rdp.cli:main"

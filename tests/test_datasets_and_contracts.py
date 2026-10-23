@@ -20,6 +20,10 @@ def test_register_versions_idempotency_and_metadata(tmp_path):
     write_jsonl(f, [{"q": "x"}])
     assert reg.register("evalset", f) == "evalset:v2"
     assert [r[0] for r in reg.list()] == ["evalset:v1", "evalset:v2"]  # returns timestamps
+    assert reg.get("evalset:latest").version_id == "evalset:v2"
+    assert reg.lineage("evalset:latest")[0][0] == "evalset:v2"
+    with pytest.raises(KeyError):
+        reg.resolve("nope:latest")
 
 
 def test_cli_datasets_lists_registered_versions(tmp_path, capsys):

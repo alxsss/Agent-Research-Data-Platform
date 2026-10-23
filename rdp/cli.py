@@ -50,7 +50,7 @@ def _show(store, args):
                         "WHERE episode_id = ? ORDER BY turn_idx, call_idx",
                         [args.episode_id]).fetchall()
     for idx, role, content, ref in turns:
-        text = content if content is not None else store.get_blob(ref).decode()
+        text = content if content is not None else (store.get_blob(ref).decode() if ref else "")
         print(f"\n[{idx}] {role}: {text[:args.width]}")
         for t, tool, a, rref in calls:
             if t == idx:

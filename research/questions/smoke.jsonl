@@ -1,0 +1,8 @@
+{"id": "smoke-01", "type": "single_fact", "question": "Who first recorded the song that later became \"I Will Follow Him\", and under what title?", "answers": ["Franck Pourcel"]}
+{"id": "smoke-02", "type": "single_fact", "question": "Which film did Fred Olen Ray describe as a \"semi-remake\" of the 1957 film The Astounding She-Monster?", "answers": ["Alienator"]}
+{"id": "smoke-03", "type": "multi_hop", "question": "Which songwriting duo wrote both \"Colour My World\" and \"Don't Sleep in the Subway\" for Petula Clark?", "answers": ["Tony Hatch and Jackie Trent", "Jackie Trent and Tony Hatch"]}
+{"id": "smoke-04", "type": "single_fact", "question": "On which Petula Clark album was \"Sign of the Times\" featured?", "answers": ["My Love"]}
+{"id": "smoke-05", "type": "single_fact", "question": "Which Irish comedian released \"Jumbo Breakfast Roll\" in 2006?", "answers": ["Pat Shortt"]}
+{"id": "smoke-06", "type": "single_fact", "question": "Who directed the 1981 film Chariots of Fire?", "answers": ["Hugh Hudson"]}
+{"id": "smoke-07", "type": "comparison", "question": "Which was released as a single first: Petula Clark's \"Sign of the Times\" or \"Don't Sleep in the Subway\"?", "answers": ["Sign of the Times"]}
+{"id": "smoke-08", "type": "unanswerable", "question": "What was the production budget of the 1999 TV film Alien Arsenal?", "answers": ["I don't know"]}

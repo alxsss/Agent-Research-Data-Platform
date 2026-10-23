@@ -7,7 +7,8 @@ versions remain queryable. A major bump requires a migration script.
 
 import pyarrow as pa
 
-SCHEMA_VERSION = "1.0"
+# 1.1: episodes.stop_reason (answered | max_steps | error:<type>)
+SCHEMA_VERSION = "1.1"
 
 TS = pa.timestamp("us", tz="UTC")
 
@@ -47,6 +48,7 @@ SCHEMAS: dict[str, pa.Schema] = {
         _f("tokens_out", pa.int64()),
         _f("latency_ms", pa.float64()),
         _f("started_at", TS, False),
+        _f("stop_reason", pa.string()),          # added in 1.1
     ]),
     # Long content is stored in the blob store; exactly one of content/content_ref is set.
     "turns": pa.schema([

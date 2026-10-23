@@ -100,6 +100,18 @@ class Registry:
     def _con(self) -> duckdb.DuckDBPyConnection:
         return duckdb.connect(str(self.path))
 
+    def resolve(self, version_id: str) -> str:
+        """Turn "<name>:latest" into the newest "<name>:v<n>"; other ids pass through."""
+        name, _, tag = version_id.rpartition(":")
+        if tag != "latest":
+            return version_id
+        with self._con() as con:
+            row = con.execute("SELECT max(version) FROM datasets WHERE name = ?",
+                              [name]).fetchone()
+        if row[0] is None:
+            raise KeyError(version_id)
+        return f"{name}:v{row[0]}"
+
     def register(self, name: str, path: str | Path, parents: Iterable[str] = (),
                  producer_run_id: str | None = None, description: str | None = None,
                  checks: Iterable[Callable[[Path], CheckResult]] = ()) -> str:
@@ -112,7 +124,7 @@ class Registry:
         path = Path(path).resolve()
         if not path.exists():
             raise FileNotFoundError(path)
-        parents = list(parents)
+        parents = [self.resolve(p) for p in parents]
 
         failed = [r for r in (check(path) for check in checks) if not r.passed]
         if failed:
@@ -144,6 +156,7 @@ class Registry:
         return version_id
 
     def get(self, version_id: str) -> DatasetVersion:
+        version_id = self.resolve(version_id)
         with self._con() as con:
             row = con.execute("SELECT version_id, name, version, content_hash, path, row_count "
                               "FROM datasets WHERE version_id = ?", [version_id]).fetchone()
@@ -159,7 +172,7 @@ class Registry:
 
     def lineage(self, version_id: str) -> list[tuple[str, int, str | None]]:
         """Ancestors of a version as (version_id, depth, producer_run_id), nearest first."""
-        self.get(version_id)
+        version_id = self.get(version_id).version_id
         with self._con() as con:
             return con.execute("""
                 WITH RECURSIVE anc(id, depth) AS (
